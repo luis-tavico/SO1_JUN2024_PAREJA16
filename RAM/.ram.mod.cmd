@@ -1,1 +1,0 @@
-savedcmd_/home/luis_tavico/Escritorio/modulos/RAM/ram.mod := printf '%s\n'   ram.o | awk '!x[$$0]++ { print("/home/luis_tavico/Escritorio/modulos/RAM/"$$0) }' > /home/luis_tavico/Escritorio/modulos/RAM/ram.mod
