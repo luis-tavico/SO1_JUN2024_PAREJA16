@@ -1,0 +1,1 @@
+savedcmd_/home/luis_tavico/Escritorio/modulos/RAM/ram.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/luis_tavico/Escritorio/modulos/RAM/ram.ko /home/luis_tavico/Escritorio/modulos/RAM/ram.o /home/luis_tavico/Escritorio/modulos/RAM/ram.mod.o;  make -f ./arch/x86/Makefile.postlink /home/luis_tavico/Escritorio/modulos/RAM/ram.ko

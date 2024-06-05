@@ -1,0 +1,1 @@
+savedcmd_/home/luis_tavico/Escritorio/modulos/CPU/Module.symvers :=  scripts/mod/modpost -m -a      -o /home/luis_tavico/Escritorio/modulos/CPU/Module.symvers -T /home/luis_tavico/Escritorio/modulos/CPU/modules.order -i Module.symvers -e 
