@@ -25,7 +25,7 @@ unsigned long rss;
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Modulo de CPU, Laboratorio Sistemas Operativos 1");
-MODULE_AUTHOR("PLTavico");
+MODULE_AUTHOR("Grupo16");
 
 static int escribir_archivo(struct seq_file *archivo, void *v) {
     for_each_process(cpu) {
@@ -87,7 +87,7 @@ static struct proc_ops operaciones =
 //Funcion a ejecuta al insertar el modulo en el kernel con insmod
 static int _insert(void)
 {
-    proc_create("cpu_202000562", 0, NULL, &operaciones);
+    proc_create("cpu_so1_1s2024", 0, NULL, &operaciones);
     printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
     return 0;
 }
@@ -95,7 +95,7 @@ static int _insert(void)
 //Funcion a ejecuta al remover el modulo del kernel con rmmod
 static void _remove(void)
 {
-    remove_proc_entry("cpu_202000562", NULL);
+    remove_proc_entry("cpu_so1_1s2024", NULL);
     printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
 }
 

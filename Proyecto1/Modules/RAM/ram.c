@@ -23,13 +23,14 @@ static void init_meminfo(void) {
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Modulo de RAM, Laboratorio Sistemas Operativos 1");
-MODULE_AUTHOR("PLTavico");
+MODULE_AUTHOR("Grupo16");
 
 //Funcion que se ejecutara cada vez que se lea el archivo con el comando CAT
 static int escribir_archivo(struct seq_file *archivo, void *v)
 {
     init_meminfo();
-    seq_printf(archivo, "%lu", si.freeram);
+    //Se escribe en el archivo la informacion de la memoria RAM en MB
+    seq_printf(archivo, "%lu,%lu,%lu\n", (si.freeram * si.mem_unit) / (1024 * 1024), ((si.totalram - si.freeram) * si.mem_unit) / (1024 * 1024), (si.totalram * si.mem_unit) / (1024 * 1024));
     return 0;
 }
 
@@ -49,7 +50,7 @@ static struct proc_ops operaciones =
 //Funcion a ejecuta al insertar el modulo en el kernel con insmod
 static int _insert(void)
 {
-    proc_create("ram_202000562", 0, NULL, &operaciones);
+    proc_create("ram_so1_jun2024", 0, NULL, &operaciones);
     printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
     return 0;
 }
@@ -57,7 +58,7 @@ static int _insert(void)
 //Funcion a ejecuta al remover el modulo del kernel con rmmod
 static void _remove(void)
 {
-    remove_proc_entry("ram_202000562", NULL);
+    remove_proc_entry("ram_so1_jun2024", NULL);
     printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
 }
 
