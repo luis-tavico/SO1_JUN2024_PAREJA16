@@ -39,7 +39,7 @@ func getData() {
 		}
 
 		// Obtener datos de la CPU
-		free_cpu_percentage, err := getCPUdata()
+		used_cpu_percentage, err := getCPUdata()
 		if err != nil {
 			fmt.Println("Error al obtener datos de la CPU: ", err)
 			//http.Error(w, "Error al obtener datos de la CPU", http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func getData() {
 		}
 
 		used_ram_percentage := 100 - free_ram_percentage
-		used_cpu_percentage := 100 - free_cpu_percentage
+		free_cpu_percentage := 100 - used_cpu_percentage
 
 		fmt.Println("RAM")
 		fmt.Println("Porcentaje de RAM libre:", free_ram_percentage)
@@ -63,16 +63,10 @@ func getData() {
 		fmt.Println("CPU")
 		fmt.Println("Porcentaje de CPU libre:", free_cpu_percentage)
 		fmt.Println("Porcentaje de CPU usada:", used_cpu_percentage)
-		fmt.Println("PID de los procesos padres:")
-
-		// obtener todos los pid de los procesos padres, no los hijos
-		var pids []int
-		for _, process := range processes.Processes {
-			pids = append(pids, process.Pid)
-		}
+		fmt.Println("Procesos")
 
 		// Convertir la estructura a formato JSON
-		jsonData, err := json.Marshal(pids)
+		jsonData, err := json.Marshal(processes)
 		if err != nil {
 			fmt.Println("Error al convertir los datos a JSON: ", err)
 			//http.Error(w, "Error al convertir los datos a JSON", http.StatusInternalServerError)

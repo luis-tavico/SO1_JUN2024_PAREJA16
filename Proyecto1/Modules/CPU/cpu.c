@@ -1,43 +1,36 @@
+// THIS_MODULE, MODULE_VERSION, ...
 #include <linux/module.h>
-// para info_ram
-#include <linux/sched.h>
-
-//Header para los macros module_init y module_exit
-#include <linux/init.h>
-//Header necesario porque se usara proc_fs
+// module_{init,exit}
+#include <linux/init.h> 
 #include <linux/proc_fs.h>
-/* for copy_from_user */
-#include <asm/uaccess.h>
-/* Header para usar la lib seq_file y manejar el archivo en /proc*/
-#include <linux/seq_file.h>
-// para get_mm_rss
-#include <linux/mm.h>
 // for_each_process()
 #include <linux/sched/signal.h>
+#include <linux/seq_file.h>
+#include <linux/fs.h>
+#include <linux/sched.h>
+// get_mm_rss()
+#include <linux/mm.h>
 // struct cred, kuid_t
 #include <linux/cred.h>
 // from_kuid()
 #include <linux/uidgid.h>
 
-struct task_struct *task; // Estructura que almacena info del cpu
-
-// Estructura que almacena info de los procesos hijos
-struct task_struct *task_child;
-// Almacena los procesos
-struct list_head *list;
-
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Modulo de CPU, Laboratorio Sistemas Operativos 1");
 MODULE_AUTHOR("Grupo16");
+MODULE_DESCRIPTION("Modulo de CPU, Laboratorio Sistemas Operativos 1");
 
-static int getPercentageCPU(void)
+struct task_struct *task;       // sched.h para tareas/procesos
+struct task_struct *task_child; // index de tareas secundarias
+struct list_head *list;         // lista de cada tareas
+
+static int getPercentageCpu(void)
 {
     struct file *file_proc;
     char lectura[256];
 
     int usuario, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice;
     int total;
-    int percentage;
+    int porcentaje;
 
     file_proc = filp_open("/proc/stat", O_RDONLY, 0);
     if (IS_ERR(file_proc))
@@ -53,15 +46,15 @@ static int getPercentageCPU(void)
 
     total = usuario + nice + system + idle + iowait + irq + softirq + steal + guest + guest_nice;
 
-    percentage = (total - idle) * 100 / total;
+    porcentaje = (total - idle) * 100 / total;
     filp_close(file_proc, NULL);
 
-    return percentage;
+    return porcentaje;
 }
 
 static int escribir_a_proc(struct seq_file *file_proc, void *v)
 {
-    int cpu_percentage = getPercentageCPU();
+    int porcentajecpu = getPercentageCpu();
     int running = 0;
     int sleeping = 0;
     int zombie = 0;
@@ -71,9 +64,9 @@ static int escribir_a_proc(struct seq_file *file_proc, void *v)
     unsigned long total_usage = 0;
     int b = 0;
     int a = 0;
-    int percentage;
+    int porcentaje;
 
-    if (cpu_percentage == -1)
+    if (porcentajecpu == -1)
     {
         seq_printf(file_proc, "Error al leer el archivo");
         return 0;
@@ -95,7 +88,7 @@ static int escribir_a_proc(struct seq_file *file_proc, void *v)
         total_usage += cpu_time;
     }
 
-    seq_printf(file_proc, "{\n\"cpu_percentage\":%d,\n", cpu_percentage);
+    seq_printf(file_proc, "{\n\"cpu_percentage\":%d,\n", porcentajecpu);
     seq_printf(file_proc, "\"processes\":[\n");
 
     for_each_process(task)
@@ -121,8 +114,8 @@ static int escribir_a_proc(struct seq_file *file_proc, void *v)
         seq_printf(file_proc, "\"name\":\"%s\",\n", task->comm);
         seq_printf(file_proc, "\"user\": %u,\n", from_kuid(&init_user_ns, task->cred->uid));
         seq_printf(file_proc, "\"state\":%u,\n", task->__state);
-        percentage = (rss * 100) / total_ram_pages;
-        seq_printf(file_proc, "\"ram\":%d,\n", percentage);
+        porcentaje = (rss * 100) / total_ram_pages;
+        seq_printf(file_proc, "\"ram\":%d,\n", porcentaje);
 
         seq_printf(file_proc, "\"child\":[\n");
         a = 0;
@@ -188,14 +181,14 @@ static struct proc_ops archivo_operaciones = {
 static int __init modulo_init(void)
 {
     proc_create("cpu_so1_1s2024", 0, NULL, &archivo_operaciones);
-    printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
+    printk(KERN_INFO "Modulo CPU creado.\n");
     return 0;
 }
 
 static void __exit modulo_cleanup(void)
 {
     remove_proc_entry("cpu_so1_1s2024", NULL);
-    printk(KERN_INFO "Laboratorio Sistemas Operativos 1\n");
+    printk(KERN_INFO "Modulo CPU eliminado.\n");
 }
 
 module_init(modulo_init);
