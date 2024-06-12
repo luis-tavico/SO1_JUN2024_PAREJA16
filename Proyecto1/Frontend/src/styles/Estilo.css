@@ -1,0 +1,72 @@
+.estadisticas-container,
+.tabla-procesos-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.title-container {
+  margin: 0 auto 10px auto; /* Reducir el margen inferior */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 10px 40px; /* Reducir el padding vertical y aumentar el horizontal */
+  background-color: rgba(0, 0, 0, 0.5); /* Ajusta el color de fondo según sea necesario */
+  width: 80%; /* Ensanchar el contenedor */
+  max-width: 1200px; /* Ancho máximo opcional */
+  min-width: 600px; /* Ancho mínimo opcional */
+}
+
+.charts-container,
+.form-container,
+.table-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.chart,
+.form-element,
+.table {
+  width: 45%;
+}
+
+input,
+button {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+button {
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+table, th, td {
+  border: 1px solid white;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+.child-row {
+  background-color: #f2f2f2; /* Color de fondo diferente para procesos hijos */
+  font-style: italic; /* Estilo de fuente diferente para procesos hijos */
+}
+
+.parent-row {
+  background-color: #c2f0c2; /* Fondo verde para procesos padres */
+}
+
+.child-row {
+  background-color: #c2c2f0; /* Fondo azul para procesos hijos */
+}
