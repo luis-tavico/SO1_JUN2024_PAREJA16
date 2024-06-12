@@ -267,6 +267,7 @@ func buscarProceso(c *fiber.Ctx) error {
 func insertDB() {
 	for range time.Tick(time.Second * 1) {
 
+		// RAM
 		freeRAMPercentage, err := getRAMdata()
 		if err != nil {
 			fmt.Println("Error al obtener datos de la RAM: ", err)
@@ -274,15 +275,15 @@ func insertDB() {
 
 		usedRAMPercentage := 100 - freeRAMPercentage
 
-		dataRAM := Model.Data{
+		dataRAM := Model.DataRAM{
 			Used_percentage: strconv.Itoa(usedRAMPercentage),
 			Free_percentage: strconv.Itoa(freeRAMPercentage),
 		}
 
 		// Insertar los datos en la base de datos
-		Controller.InsertData("ram", dataRAM)
+		Controller.InsertDataRAM("ram", dataRAM)
 
-		// Obtener datos de la CPU
+		// CPU
 		usedCPUPercentage, err := getCPUdata()
 		if err != nil {
 			fmt.Println("Error al obtener datos de la CPU: ", err)
@@ -290,12 +291,41 @@ func insertDB() {
 
 		freeCPUPercentage := 100 - usedCPUPercentage
 
-		dataCPU := Model.Data{
+		dataCPU := Model.DataCPU{
 			Used_percentage: strconv.Itoa(usedCPUPercentage),
 			Free_percentage: strconv.Itoa(freeCPUPercentage),
 		}
 		// Insertar los datos en la base de datos
-		Controller.InsertData("cpu", dataCPU)
+		Controller.InsertDataCPU("cpu", dataCPU)
+
+		// Procesos
+		processes, err := getProcesses()
+		if err != nil {
+			fmt.Println("Error al obtener los procesos del sistema: ", err)
+		}
+
+		for _, process := range processes.Processes {
+			dataProcess := Model.DataProcess{
+				Pid:   strconv.Itoa(process.Pid),
+				Name:  process.Name,
+				User:  strconv.Itoa(process.User),
+				State: strconv.Itoa(process.State),
+				Ram:   strconv.Itoa(process.Ram),
+			}
+			// Insertar los datos en la base de datos
+			Controller.InsertDataProcess("process", dataProcess)
+
+			for _, child := range process.Child {
+				dataProcess := Model.DataProcess{
+					Pid:      strconv.Itoa(child.Pid),
+					Name:     child.Name,
+					State:    strconv.Itoa(child.State),
+					PidPadre: strconv.Itoa(process.Pid),
+				}
+				// Insertar los datos en la base de datos
+				Controller.InsertDataProcess("process", dataProcess)
+			}
+		}
 
 	}
 }
