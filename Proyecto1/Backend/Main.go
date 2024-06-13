@@ -233,7 +233,7 @@ func crearProceso(c *fiber.Ctx) error {
     // Crear la respuesta
     response := map[string]string{
         "estado": "creado",
-        "pid":    "El proceso "+pid+" fue creado.",
+        "pid":    pid,
     }
 
     // Retornar la respuesta JSON
