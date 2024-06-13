@@ -35,7 +35,7 @@ func main() {
 	app.Delete("/procesos/eliminar/:pid", eliminarProceso)
 	app.Get("/procesos/:pid", buscarProceso)
 
-	//go insertDB()
+	go insertDB()
 
 	if err := app.Listen(":8080"); err != nil {
 		panic(err)
@@ -266,6 +266,15 @@ func buscarProceso(c *fiber.Ctx) error {
 
 func insertDB() {
 	for range time.Tick(time.Second * 1) {
+
+		// Eliminar todos los documentos de la colección ram
+		Controller.DeleteDataRAM("ram")
+
+		// Eliminar todos los documentos de la colección cpu
+		Controller.DeleteDataCPU("cpu")
+
+		// Eliminar todos los documentos de la colección process
+		Controller.DeleteDataProcess("process")
 
 		// RAM
 		freeRAMPercentage, err := getRAMdata()
