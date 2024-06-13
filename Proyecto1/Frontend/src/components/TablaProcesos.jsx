@@ -70,11 +70,9 @@ function TablaProcesos() {
     []
   );
 
-  // Función para crear un proceso
   const handleCreateProcess = () => {
     fetch('/procesos/crear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'GET', // Cambia el método a GET
     })
       .then(response => response.json())
       .then(data => {
@@ -155,35 +153,57 @@ function TablaProcesos() {
   return (
     <div>
       <div className="title-container">
-        <h1>Tabla de Procesos</h1>
-      </div>
-      <Button onClick={handleCreateProcess}>Crear Proceso</Button>
-      <InputGroup className="mb-3">
-        <FormControl
-          placeholder="PID para eliminar"
-          value={pidToKill}
-          onChange={(e) => setPidToKill(e.target.value)}
-        />
-        <Button variant="danger" onClick={handleKillProcess}>Eliminar Proceso</Button>
-      </InputGroup>
+  <h1>Tabla de Procesos</h1>
+</div>
+
+<br />
+
+<Button variant="success" onClick={handleCreateProcess}>
+  <i className="bi bi-file-earmark-plus"></i> Crear Proceso
+</Button>
+
+<br /><br />
+
+<InputGroup className="mb-3">
+  <FormControl
+    placeholder="PID para eliminar"
+    value={pidToKill}
+    onChange={(e) => setPidToKill(e.target.value)}
+  />
+  <Button variant="danger" onClick={handleKillProcess}>
+    <i className="bi bi-file-earmark-x"></i> Eliminar Proceso
+  </Button>
+</InputGroup>
+
+<InputGroup className="mb-3">
+  {searchBy === 'name' ? (
+    <>
+      <FormControl
+        type="text"
+        placeholder="Buscar por nombre"
+        value={searchTerm}
+        onChange={handleSearchChange}
+      />
       <Button onClick={handleSearchByChange}>
-        {searchBy === 'name' ? 'Buscar por PID' : 'Buscar por Nombre'}
+        <i className="bi bi-search"></i> Buscar por PID
       </Button>
-      {searchBy === 'name' ? (
-        <input
-          type="text"
-          placeholder="Buscar por nombre"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      ) : (
-        <input
-          type="text"
-          placeholder="Buscar por PID"
-          value={searchPidTerm}
-          onChange={handleSearchPidChange}
-        />
-      )}
+    </>
+  ) : (
+    <>
+      <FormControl
+        type="text"
+        placeholder="Buscar por PID"
+        value={searchPidTerm}
+        onChange={handleSearchPidChange}
+      />
+      <Button onClick={handleSearchByChange}>
+        <i className="bi bi-search"></i> Buscar por Nombre
+      </Button>
+    </>
+  )}
+</InputGroup>
+
+
       <Table {...getTableProps()} striped bordered hover>
         <thead>
           {headerGroups.map(headerGroup => (
