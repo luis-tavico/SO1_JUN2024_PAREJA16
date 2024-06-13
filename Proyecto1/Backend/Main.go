@@ -9,6 +9,7 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -45,7 +46,7 @@ func main() {
 // Estructura para los datos del sistema
 type SystemData struct {
 	RAM_percentage int `json:"ram_percentage"`
-	CPU_percentage int `json:"cpu_percentage"`
+	CPU_percentage float64 `json:"cpu_percentage"`
 }
 
 // Estructura para los procesos hijo
@@ -91,22 +92,37 @@ func getRAMdata() (int, error) {
 }
 
 // Funcion para obtener datos de la CPU
-func getCPUdata() (int, error) {
-	cmd := exec.Command("sh", "-c", "cat /proc/cpu_so1_1s2024")
+func getCPUdata() (float64, error) {
+	// Ejecutar el comando mpstat y obtener la métrica %idle
+	cmd := exec.Command("sh", "-c", "mpstat 1 1 | awk '/all/ {print $12}'")
 	stdout, err := cmd.CombinedOutput()
-
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Error ejecutando comando para obtener datos de CPU: %v", err)
 	}
 
-	// Convertir la salida a formato JSON
-	var data SystemData
-	err = json.Unmarshal(stdout, &data)
+	// Convertir la salida a string y eliminar espacios en blanco
+	output := strings.TrimSpace(string(stdout))
+
+	// Dividir la salida por líneas y tomar la primera línea (debe ser 'all')
+	lines := strings.Split(output, "\n")
+	if len(lines) < 1 {
+		return 0, fmt.Errorf("Error: salida inesperada del comando mpstat")
+	}
+	cpuPercentageStr := strings.TrimSpace(lines[0])
+
+	// Reemplazar cualquier coma (,) por punto (.) en el formato numérico
+	cpuPercentageStr = strings.Replace(cpuPercentageStr, ",", ".", -1)
+
+	// Convertir el string a float64
+	cpuPercentage, err := strconv.ParseFloat(cpuPercentageStr, 64)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Error al convertir datos de CPU a float: %v", err)
 	}
 
-	return data.CPU_percentage, nil
+	// Calcular el porcentaje de uso de la CPU
+	cpuUsage := 100.0 - cpuPercentage
+
+	return cpuUsage, nil
 }
 
 // Funcion para obtener los procesos del sistema
@@ -131,19 +147,18 @@ func getEstadisticas(c *fiber.Ctx) error {
 	// Obtener datos de la RAM
 	freeRAMPercentage, err := getRAMdata()
 	if err != nil {
-		return c.Status(500).SendString("Error al obtener datos de la RAM")
+		return c.Status(500).SendString(fmt.Sprintf("Error al obtener datos de la RAM: %v", err))
 	}
 
 	// Obtener datos de la CPU
 	usedCPUPercentage, err := getCPUdata()
 	if err != nil {
-		return c.Status(500).SendString("Error al obtener datos de la CPU")
+		return c.Status(500).SendString(fmt.Sprintf("Error al obtener datos de la CPU: %v", err))
 	}
 
 	usedRAMPercentage := 100 - freeRAMPercentage
-	//freeCPUPercentage := 100 - usedCPUPercentage
 
-	estadisticas := map[string]int{
+	estadisticas := map[string]interface{}{
 		"ram_percentage": usedRAMPercentage,
 		"cpu_percentage": usedCPUPercentage,
 	}
@@ -298,8 +313,8 @@ func insertDB() {
 		freeCPUPercentage := 100 - usedCPUPercentage
 
 		dataCPU := Model.DataCPU{
-			Used_percentage: strconv.Itoa(usedCPUPercentage),
-			Free_percentage: strconv.Itoa(freeCPUPercentage),
+			Used_percentage: strconv.FormatFloat(usedCPUPercentage, 'f', 2, 64),
+			Free_percentage: strconv.FormatFloat(freeCPUPercentage, 'f', 2, 64),
 		}
 		// Insertar los datos en la base de datos
 		Controller.InsertDataCPU("cpu", dataCPU)
