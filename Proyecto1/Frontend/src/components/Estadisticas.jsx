@@ -15,7 +15,7 @@ function Estadisticas() {
         .then(data => {
           setCpuData(parseFloat(data.cpu_percentage));
           setRamData(parseInt(data.ram_percentage));
-          console.log('Datos recibidos:', data); // Imprimir en la consola
+          //console.log('Datos recibidos:', data); // Imprimir en la consola
         })
         .catch(error => console.error('Error fetching data:', error));
     };
@@ -24,7 +24,7 @@ function Estadisticas() {
 
     const interval = setInterval(() => {
       fetchData(); // Realiza una llamada cada 2 segundos
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
   }, []);

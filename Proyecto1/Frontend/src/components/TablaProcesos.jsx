@@ -1,48 +1,103 @@
-import React, { useState, useEffect } from 'react'; // Importa React y hooks de estado y efectos
-import { useTable, useExpanded } from 'react-table'; // Importa funciones de react-table para crear tablas y manejar filas expandidas
-import { Table, Button, InputGroup, FormControl } from 'react-bootstrap'; // Importa componentes de react-bootstrap para la interfaz
-import '../styles/EstiloProcesos.css'; // Importa estilos personalizados
+import React, { useState, useEffect } from 'react';
+import { useTable, useExpanded } from 'react-table';
+import { Table, Button, InputGroup, FormControl } from 'react-bootstrap';
+import '../styles/EstiloProcesos.css';
 
 function TablaProcesos() {
-  // Define los estados del componente
-  const [processes, setProcesses] = useState([]); // Estado para almacenar los procesos
-  const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda por nombre
-  const [searchPidTerm, setSearchPidTerm] = useState(''); // Estado para el término de búsqueda por PID
-  const [info, setInfo] = useState({}); // Estado para la información adicional de los procesos
-  const [pidToKill, setPidToKill] = useState(''); // Estado para almacenar el PID a eliminar
-  const [searchBy, setSearchBy] = useState('name'); // Estado para determinar si se busca por nombre o por PID
-  const [lastCreatedPid, setLastCreatedPid] = useState(''); // Estado para almacenar el PID del último proceso creado
+  const [processes, setProcesses] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchPidTerm, setSearchPidTerm] = useState('');
+  const [info, setInfo] = useState({});
+  const [pidToKill, setPidToKill] = useState('');
+  const [searchBy, setSearchBy] = useState('name');
+  const [lastCreatedPid, setLastCreatedPid] = useState('');
 
-  // Efecto para cargar los datos de los procesos desde la API
-  useEffect(() => {
-    // Función para cargar los datos de los procesos
-    const fetchProcesses = () => {
-      fetch('http://192.168.122.195:8080/procesos')
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.procesos.processes) {
-            setProcesses(data.procesos.processes);
-            setInfo(data.info || {});
-          } else {
-            setProcesses([]);
-            setInfo({});
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching processes:', error);
+  // Función para cargar los datos de los procesos
+  const fetchProcesses = () => {
+    fetch('http://192.168.122.195:8080/procesos')
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.procesos.processes) {
+          setProcesses(data.procesos.processes);
+          setInfo(data.info || {});
+        } else {
           setProcesses([]);
           setInfo({});
-        });
-    };
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching processes:', error);
+        setProcesses([]);
+        setInfo({});
+      });
+  };
 
-    // Llamar a fetchProcesses inicialmente y luego cada 2 segundos
-    fetchProcesses(); // Llamar inicialmente
-
-    const intervalId = setInterval(fetchProcesses, 2000); // Llamar cada 2 segundos
-
-    // Limpiar intervalo al desmontar el componente
-    return () => clearInterval(intervalId);
+  // Efecto para cargar los datos de los procesos inicialmente
+  useEffect(() => {
+    fetchProcesses(); // Llama inicialmente
   }, []); // [] para ejecutar solo una vez al montar
+
+  // Función para manejar la actualización de procesos al presionar un botón
+  const handleUpdateProcesses = () => {
+    fetchProcesses(); // Llama a fetchProcesses para actualizar los procesos
+  };
+
+  const handleCreateProcess = () => {
+    fetch('http://192.168.122.195:8080/procesos/crear', {
+      method: 'GET',
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.estado === 'creado') {
+          setLastCreatedPid(data.pid);
+          showAlert(`Proceso creado con PID: ${data.pid}`);
+          // Actualiza la tabla después de crear el proceso
+          fetchProcesses();
+        } else {
+          showAlert('Error al crear proceso');
+        }
+      })
+      .catch(error => {
+        console.error('Error creating process:', error);
+        showAlert('Error al crear proceso');
+      });
+  };
+
+  const handleKillProcess = () => {
+    fetch(`http://192.168.122.195:8080/procesos/eliminar/${pidToKill}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.estado === 'Eliminado') {
+          showAlert(`El proceso ${pidToKill} fue eliminado.`);
+          if (pidToKill === lastCreatedPid) {
+            setLastCreatedPid('');
+          }
+          // Actualiza la tabla después de eliminar el proceso
+          fetchProcesses();
+        } else {
+          showAlert('Error al eliminar proceso');
+        }
+      })
+      .catch(error => {
+        console.error('Error killing process:', error);
+        showAlert('Error al eliminar proceso');
+      });
+  };
+
+  // Función para mostrar alertas flotantes
+  const showAlert = (message) => {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = 'alert-container';
+    alertContainer.innerText = message;
+    document.body.appendChild(alertContainer);
+
+    setTimeout(() => {
+      alertContainer.remove();
+    }, 3000); // Desaparece después de 3 segundos (ajustable según necesidad)
+  };
 
   // Define las columnas de la tabla
   const columns = React.useMemo(
@@ -81,67 +136,6 @@ function TablaProcesos() {
     ],
     []
   );
-
-  const handleCreateProcess = () => {
-    fetch('http://192.168.122.195:8080/procesos/crear', {
-      method: 'GET', // Cambia el método a GET según la definición de tu API
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.estado === 'creado') {
-          // Actualiza el estado con el PID del proceso creado
-          setLastCreatedPid(data.pid);
-          // Mostrar alerta flotante para proceso creado exitosamente
-          showAlert(`Proceso creado con PID: ${data.pid}`);
-        } else {
-          // Mostrar alerta flotante para error al crear proceso
-          showAlert('Error al crear proceso');
-        }
-      })
-      .catch(error => {
-        console.error('Error creating process:', error);
-        // Mostrar alerta flotante para error general
-        showAlert('Error al crear proceso');
-      });
-  };
-
-  // Función para mostrar alertas flotantes
-  const showAlert = (message) => {
-    const alertContainer = document.createElement('div');
-    alertContainer.className = 'alert-container';
-    alertContainer.innerText = message;
-    document.body.appendChild(alertContainer);
-
-    setTimeout(() => {
-      alertContainer.remove();
-    }, 3000); // Desaparece después de 3 segundos (ajustable según necesidad)
-  };
-
-  const handleKillProcess = () => {
-    fetch(`http://192.168.122.195:8080/procesos/eliminar/${pidToKill}`, {
-      method: 'POST', // Asegúrate de usar el método correcto según tu API
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.estado === 'Eliminado') {
-          // Mostrar alerta flotante para proceso eliminado exitosamente
-          showAlert(`El proceso ${pidToKill} fue eliminado.`);
-          // Verificar si el proceso eliminado es el último creado y actualizar el estado
-          if (pidToKill === lastCreatedPid) {
-            setLastCreatedPid('');
-          }
-        } else {
-          // Mostrar alerta flotante para error al eliminar proceso
-          showAlert('Error al eliminar proceso');
-        }
-      })
-      .catch(error => {
-        console.error('Error killing process:', error);
-        // Mostrar alerta flotante para error general
-        showAlert('Error al eliminar proceso');
-      });
-  };
 
   // Prepara los datos para la tabla
   const data = React.useMemo(
@@ -191,11 +185,18 @@ function TablaProcesos() {
     return row.original.pid.toString().includes(searchPidTerm);
   });
 
+  /**
+   * <Button variant="primary" onClick={handleUpdateProcesses}>
+        Actualizar Procesos
+      </Button>
+   */
+
   return (
     <div>
       <div className="title-container">
         <h1>Tabla de Procesos</h1>
       </div>
+
       <table className="horizontal-table">
         <tbody>
           <tr className="table-header">
@@ -215,17 +216,19 @@ function TablaProcesos() {
         </tbody>
       </table>
 
+      
+
       <div>
         <Table className="no-border-table">
           <tbody>
-          <tr>
-            <td className="centered-cell">{lastCreatedPid ? `Último proceso creado: ${lastCreatedPid}` : 'Último proceso creado'}</td>
-            <td>
-              <Button variant="success" onClick={handleCreateProcess}>
-                <i className="bi bi-file-earmark-plus"></i> Crear Proceso
-              </Button>
-            </td>
-          </tr>
+            <tr>
+              <td className="centered-cell">{lastCreatedPid ? `Último proceso creado: ${lastCreatedPid}` : 'Último proceso creado'}</td>
+              <td>
+                <Button variant="success" onClick={handleCreateProcess}>
+                  <i className="bi bi-file-earmark-plus"></i> Crear Proceso
+                </Button>
+              </td>
+            </tr>
             <tr>
               <td>
                 <FormControl
