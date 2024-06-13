@@ -31,9 +31,8 @@ func main() {
 	// Rutas API
 	app.Get("/estadisticas", getEstadisticas)
 	app.Get("/procesos", getProcesos)
-	app.Post("/procesos/crear", crearProceso)
-	app.Delete("/procesos/eliminar/:pid", eliminarProceso)
-	app.Get("/procesos/:pid", buscarProceso)
+	app.Get("/procesos/crear", crearProceso)
+	app.Post("/procesos/eliminar/:pid", detenerProceso)
 
 	//go insertDB()
 
@@ -153,115 +152,113 @@ func getEstadisticas(c *fiber.Ctx) error {
 }
 
 func getProcesos(c *fiber.Ctx) error {
-	/*
-		processData, err := getProcesses()
-		if err != nil {
-			return c.Status(500).SendString("Error al obtener los procesos del sistema")
-		}
-
-		var procesos []map[string]interface{}
-		var enEjecucion, suspendidos, detenidos, zombies int
-
-		for _, process := range processData.Processes {
-			proceso := map[string]interface{}{
-				"pid":     process.Pid,
-				"nombre":  process.Name,
-				"estado":  process.State,
-				"ram":     process.Ram,
-				"usuario": process.User,
-			}
-			procesos = append(procesos, proceso)
-
-			// Contar los procesos por estado
-			switch process.State {
-			case 0: // Ejecución
-				enEjecucion++
-			case 1: // Suspendidos
-				suspendidos++
-			case 2: // Detenidos
-				detenidos++
-			case 3: // Zombies
-				zombies++
-			}
-		}
-
-		total := len(procesos)
-		info := map[string]int{
-			"en_ejecucion": enEjecucion,
-			"suspendidos":  suspendidos,
-			"detenidos":    detenidos,
-			"zombies":      zombies,
-			"total":        total,
-		}
-
-		response := map[string]interface{}{
-			"procesos": procesos,
-			"info":     info,
-		}
-
-		return c.JSON(response)
-	*/
-
-	// Obtener los procesos del sistema
-	processes, err := getProcesses()
+	
+	processData, err := getProcesses()
 	if err != nil {
-		fmt.Println("Error al obtener los procesos del sistema: ", err)
 		return c.Status(500).SendString("Error al obtener los procesos del sistema")
-
 	}
 
-	/*
-		// Convertir la estructura a formato JSON
-		json_processes, err := json.Marshal(processes)
-		if err != nil {
-			fmt.Println("Error al convertir los datos a JSON: ", err)
-			return c.Status(500).SendString("Error al convertir los datos a JSON")
-		}
-	*/
+	var procesos []map[string]interface{}
+	var enEjecucion, suspendidos, detenidos, zombies int
 
-	return c.JSON(processes)
+	for _, process := range processData.Processes {
+		proceso := map[string]interface{}{
+			"pid":     process.Pid,
+			"nombre":  process.Name,
+			"estado":  process.State,
+			"ram":     process.Ram,
+			"usuario": process.User,
+		}
+		procesos = append(procesos, proceso)
+
+		// Contar los procesos por estado
+		switch process.State {
+		case 1: // Ejecución
+			enEjecucion++
+		case 0: // Suspendidos
+			suspendidos++
+		case 128: // Detenidos
+			detenidos++
+		case 1026: // Zombies
+			zombies++
+		}
+	}
+
+	total := len(procesos)
+	info := map[string]int{
+		"en_ejecucion": enEjecucion,
+		"suspendidos":  suspendidos,
+		"detenidos":    detenidos,
+		"zombies":      zombies,
+		"total":        total,
+	}
+
+	
+
+// Obtener los procesos del sistema
+processes, err := getProcesses()
+if err != nil {
+	fmt.Println("Error al obtener los procesos del sistema: ", err)
+	return c.Status(500).SendString("Error al obtener los procesos del sistema")
+
+}
+
+
+response := map[string]interface{}{
+	"procesos": processes,
+	"info":     info,
+}
+
+return c.JSON(response)
+
 }
 
 func crearProceso(c *fiber.Ctx) error {
-	cmd := exec.Command("sh", "-c", "sleep infinity &")
-	err := cmd.Run()
-	if err != nil {
-		return c.Status(500).SendString("Error al crear el proceso")
-	}
+    // Crear el comando
+    cmd := exec.Command("sleep", "infinity")
 
-	return c.SendString("Proceso creado exitosamente")
+    // Iniciar el comando
+    err := cmd.Start()
+    if err != nil {
+        response := map[string]string{
+            "estado": "Error",
+            "pid":    "Error al crear el proceso",
+        }
+        return c.JSON(response)
+    }
+
+    // Obtener el PID del proceso y convertirlo a string
+    pid := strconv.Itoa(cmd.Process.Pid)
+
+    // Crear la respuesta
+    response := map[string]string{
+        "estado": "creado",
+        "pid":    "El proceso "+pid+" fue creado.",
+    }
+
+    // Retornar la respuesta JSON
+    return c.JSON(response)
 }
 
-func eliminarProceso(c *fiber.Ctx) error {
+func detenerProceso(c *fiber.Ctx) error {
 	pid := c.Params("pid")
-	cmd := exec.Command("sh", "-c", "kill "+pid)
+	cmd := exec.Command("kill", "-9", pid)
 	err := cmd.Run()
 	if err != nil {
-		return c.Status(500).SendString("Error al eliminar el proceso")
-	}
-
-	return c.SendString("Proceso eliminado exitosamente")
-}
-
-func buscarProceso(c *fiber.Ctx) error {
-	pidStr := c.Params("pid")
-	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
-		return c.Status(400).SendString("PID inválido")
-	}
-
-	processes, err := getProcesses()
-	if err != nil {
-		return c.Status(500).SendString("Error al obtener los procesos del sistema")
-	}
-
-	for _, process := range processes.Processes {
-		if process.Pid == pid {
-			return c.JSON(process)
+		response := map[string]string{
+			"estado": "Error",
+			"pid":    "Error al detener el proceso",
 		}
+		return c.JSON(response)
 	}
+	// Crear la respuesta
+    response := map[string]string{
+        "estado": "Eliminado",
+        "pid":    "El proceso "+pid+ " fue detenido.",
+    }
 
-	return c.Status(404).SendString("Proceso no encontrado")
+    // Retornar la respuesta JSON
+    return c.JSON(response)
 }
 
 func insertDB() {
