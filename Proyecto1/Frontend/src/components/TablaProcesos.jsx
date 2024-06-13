@@ -14,23 +14,34 @@ function TablaProcesos() {
 
   // Efecto para cargar los datos de los procesos desde la API
   useEffect(() => {
-    fetch('http://192.168.122.195:8080/procesos')
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.processes) {
-          setProcesses(data.processes); // Actualiza los procesos si se obtienen datos válidos
-          setInfo(data.info || {}); // Actualiza la información adicional
-        } else {
-          setProcesses([]); // Si no hay datos válidos, limpia los procesos
-          setInfo({}); // Limpia la información adicional
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching processes:', error); // Muestra un error en caso de fallo
-        setProcesses([]); // Limpia los procesos en caso de error
-        setInfo({}); // Limpia la información adicional en caso de error
-      });
-  }, []);
+    // Función para cargar los datos de los procesos
+    const fetchProcesses = () => {
+      fetch('http://192.168.122.195:8080/procesos')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.procesos.processes) {
+            setProcesses(data.procesos.processes);
+            setInfo(data.info || {});
+          } else {
+            setProcesses([]);
+            setInfo({});
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching processes:', error);
+          setProcesses([]);
+          setInfo({});
+        });
+    };
+
+    // Llamar a fetchProcesses inicialmente y luego cada 2 segundos
+    fetchProcesses(); // Llamar inicialmente
+
+    const intervalId = setInterval(fetchProcesses, 2000); // Llamar cada 2 segundos
+
+    // Limpiar intervalo al desmontar el componente
+    return () => clearInterval(intervalId);
+  }, []); // [] para ejecutar solo una vez al montar
 
   // Define las columnas de la tabla
   const columns = React.useMemo(
@@ -71,37 +82,62 @@ function TablaProcesos() {
   );
 
   const handleCreateProcess = () => {
-    fetch('/procesos/crear', {
-      method: 'GET', // Cambia el método a GET
+    fetch('http://192.168.122.195:8080/procesos/crear', {
+      method: 'GET', // Cambia el método a GET según la definición de tu API
     })
+    
       .then(response => response.json())
       .then(data => {
-        if (data && data.procesos) {
-          setProcesses(data.procesos); // Actualiza los procesos con los nuevos datos
-          setInfo(data.info || {}); // Actualiza la información adicional
+        if (data.estado === 'creado') {
+          // Mostrar alerta flotante para proceso creado exitosamente
+          showAlert(data.pid);
+        } else {
+          // Mostrar alerta flotante para error al crear proceso
+          showAlert(data.pid);
         }
       })
-      .catch(error => console.error('Error creating process:', error)); // Muestra un error en caso de fallo
+      .catch(error => {
+        console.error('Error creating process:', error);
+        // Mostrar alerta flotante para error general
+        showAlert(data.pid);
+      });
   };
+  
+  // Función para mostrar alertas flotantes
+  const showAlert = (message) => {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = 'alert-container';
+    alertContainer.innerText = message;
+    document.body.appendChild(alertContainer);
+  
+    setTimeout(() => {
+      alertContainer.remove();
+    }, 3000); // Desaparece después de 3 segundos (ajustable según necesidad)
+  };
+  
 
-  // Función para eliminar un proceso
   const handleKillProcess = () => {
-    fetch(`/procesos/eliminar/${pidToKill}`, {
-      method: 'DELETE',
+    fetch(`http://192.168.122.195:8080/procesos/eliminar/${pidToKill}`, {
+      method: 'POST', // Asegúrate de usar el método correcto según tu API
       headers: { 'Content-Type': 'application/json' },
     })
       .then(response => response.json())
       .then(data => {
-        if (data && data.procesos) {
-          setProcesses(data.procesos); // Actualiza los procesos con los nuevos datos
-          setInfo(data.info || {}); // Actualiza la información adicional
+        if (data.estado === 'Eliminado') {
+          // Mostrar alerta flotante para proceso eliminado exitosamente
+          showAlert(`El proceso ${pidToKill} fue eliminado.`);
         } else {
-          alert('PID no encontrado'); // Muestra una alerta si el PID no se encuentra
+          // Mostrar alerta flotante para error al eliminar proceso
+          showAlert(data.pid);
         }
       })
-      .catch(error => console.error('Error killing process:', error)); // Muestra un error en caso de fallo
+      .catch(error => {
+        console.error('Error killing process:', error);
+        // Mostrar alerta flotante para error general
+        showAlert(data.pid);
+      });
   };
-
+  
   // Prepara los datos para la tabla
   const data = React.useMemo(
     () =>
@@ -153,8 +189,27 @@ function TablaProcesos() {
   return (
     <div>
       <div className="title-container">
-  <h1>Tabla de Procesos</h1>
-</div>
+    <h1>Tabla de Procesos</h1>
+    </div>
+    <table className="horizontal-table">
+        <tbody>
+            <tr className="table-header">
+                <td>En ejecución (1)</td>
+                <td>Suspendidos (0)</td>
+                <td>Detenidos (128)</td>
+                <td>Zombies (1026)</td>
+                <td>Total</td>
+            </tr>
+            <tr className='subRow'>
+                <td>{info.en_ejecucion}</td>
+                <td>{info.suspendidos}</td>
+                <td>{info.detenidos}</td>
+                <td>{info.zombies}</td>
+                <td>{info.total}</td>
+            </tr>
+        </tbody>
+    </table>
+
 
 <br />
 
