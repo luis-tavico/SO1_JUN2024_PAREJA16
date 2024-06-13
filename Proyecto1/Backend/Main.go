@@ -35,7 +35,7 @@ func main() {
 	app.Delete("/procesos/eliminar/:pid", eliminarProceso)
 	app.Get("/procesos/:pid", buscarProceso)
 
-	go insertDB()
+	//go insertDB()
 
 	if err := app.Listen(":8080"); err != nil {
 		panic(err)
