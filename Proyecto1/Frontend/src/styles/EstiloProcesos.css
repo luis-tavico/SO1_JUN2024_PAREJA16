@@ -48,3 +48,23 @@ input[type="text"] {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
+
+.no-border-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.no-border-table td, .no-border-table th, .no-border-table tr {
+  border: none !important;
+}
+
+.no-border-table input, .no-border-table button {
+  width: 100%;
+}
+
+.centered-cell {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%; /* Opcional: asegura que la celda ocupe toda la altura disponible */
+}
