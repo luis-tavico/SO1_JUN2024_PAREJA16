@@ -13,8 +13,8 @@ function Estadisticas() {
       fetch('http://192.168.122.195:8080/estadisticas') // Reemplaza con tu endpoint real
         .then(response => response.json())
         .then(data => {
-          setCpuData(data.cpu_percentage);
-          setRamData(data.ram_percentage);
+          setCpuData(parseFloat(data.cpu_percentage));
+          setRamData(parseInt(data.ram_percentage));
           console.log('Datos recibidos:', data); // Imprimir en la consola
         })
         .catch(error => console.error('Error fetching data:', error));
@@ -30,12 +30,12 @@ function Estadisticas() {
   }, []);
 
   const doughnutData = (label, percentageUsed) => {
-    const percentageFree = 100 - parseFloat(percentageUsed);
+    const percentageFree = 100 - percentageUsed;
     return {
       labels: [`${label} Usado`, `${label} Libre`],
       datasets: [
         {
-          data: [parseFloat(percentageUsed), percentageFree],
+          data: [percentageUsed, percentageFree],
           backgroundColor: ['#FF6384', '#36A2EB'],
         },
       ],
