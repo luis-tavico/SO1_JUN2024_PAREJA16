@@ -12,9 +12,11 @@ function TablaProcesos() {
   const [searchBy, setSearchBy] = useState('name');
   const [lastCreatedPid, setLastCreatedPid] = useState('');
 
+  const url = "http://192.168.122.30:8080";
+
   // Función para cargar los datos de los procesos
   const fetchProcesses = () => {
-    fetch('http://192.168.122.195:8080/procesos')
+    fetch(url+'/procesos')
       .then(response => response.json())
       .then(data => {
         if (data && data.procesos.processes) {
@@ -43,7 +45,7 @@ function TablaProcesos() {
   };
 
   const handleCreateProcess = () => {
-    fetch('http://192.168.122.195:8080/procesos/crear', {
+    fetch(url+'/procesos/crear', {
       method: 'GET',
     })
       .then(response => response.json())
@@ -64,7 +66,7 @@ function TablaProcesos() {
   };
 
   const handleKillProcess = () => {
-    fetch(`http://192.168.122.195:8080/procesos/eliminar/${pidToKill}`, {
+    fetch(url+`/procesos/eliminar/${pidToKill}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
