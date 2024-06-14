@@ -3,6 +3,7 @@ package Database
 import (
 	"Backend/Instance"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -26,23 +27,28 @@ func Connect() error {
 	server := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
-	var mongoUri = "mongodb://" + server + ":" + port + "/" + dbName
+	mongoUri := fmt.Sprintf("mongodb://%s:%s", server, port)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	err = client.Connect(ctx)
-	db := client.Database(dbName)
-
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
+
+	db := client.Database(dbName)
 
 	Instance.Mg = Instance.MongoInstance(MongoInstance{
 		Client: client,
 		Db:     db,
 	})
 
+	fmt.Printf("Connected to database: %s\n", dbName)
 	return nil
 }

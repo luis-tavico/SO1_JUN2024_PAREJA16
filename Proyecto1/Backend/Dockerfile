@@ -4,6 +4,7 @@ WORKDIR /go/src/app
 
 COPY . ./
 
+RUN apk add --no-cache git
 RUN go get -d -v
 RUN go build -o /go/bin/app
 RUN go get github.com/gorilla/mux
@@ -13,16 +14,9 @@ RUN go get go.mongodb.org/mongo-driver/mongo/options
 RUN go get github.com/gofiber/fiber/v2
 RUN go get github.com/gofiber/fiber/v2/middleware/cors
 
-#ENV DB_HOST="localhost"
-#ENV DB_PORT="27017"
-#ENV DB_NAME="DB"
-
-#EXPOSE 8000
-
-#CMD ["go", "run", "Main.go"]
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates bash sysstat
 
 WORKDIR /app
 COPY --from=builder /go/bin/app /app

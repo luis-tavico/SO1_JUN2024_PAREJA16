@@ -21,8 +21,9 @@ func main() {
 
 	// Habilitar CORS
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5174",
+		AllowOrigins: "http://192.168.122.30", // Cambia a la IP o dominio desde donde sirves el frontend
 		AllowMethods: "GET,POST,DELETE",
+		AllowHeaders: "Content-Type, Authorization",
 	}))
 
 	if err := Database.Connect(); err != nil {
@@ -35,7 +36,7 @@ func main() {
 	app.Get("/procesos/crear", crearProceso)
 	app.Post("/procesos/eliminar/:pid", detenerProceso)
 
-	//go insertDB()
+	go insertDB()
 
 	if err := app.Listen(":8080"); err != nil {
 		panic(err)
@@ -93,37 +94,32 @@ func getRAMdata() (int, error) {
 
 // Funcion para obtener datos de la CPU
 func getCPUdata() (float64, error) {
-	// Ejecutar el comando mpstat y obtener la métrica %idle
-	cmd := exec.Command("sh", "-c", "mpstat 1 1 | awk '/all/ {print $12}'")
-	stdout, err := cmd.CombinedOutput()
-	if err != nil {
-		return 0, fmt.Errorf("Error ejecutando comando para obtener datos de CPU: %v", err)
-	}
+    cmd := exec.Command("sh", "-c", "mpstat 1 1 | awk '/Average:/ {print $12}'")
+    stdout, err := cmd.CombinedOutput()
+    if err != nil {
+        return 0, err
+    }
 
-	// Convertir la salida a string y eliminar espacios en blanco
-	output := strings.TrimSpace(string(stdout))
+    // Convertir la salida a float64
+    cpuIdleStr := strings.TrimSpace(string(stdout))
+    cpuIdle, err := strconv.ParseFloat(cpuIdleStr, 64)
+    if err != nil {
+        return 0, err
+    }
 
-	// Dividir la salida por líneas y tomar la primera línea (debe ser 'all')
-	lines := strings.Split(output, "\n")
-	if len(lines) < 1 {
-		return 0, fmt.Errorf("Error: salida inesperada del comando mpstat")
-	}
-	cpuPercentageStr := strings.TrimSpace(lines[0])
+    // Calcular el porcentaje de uso de CPU
+    cpuUsage := 100 - cpuIdle
 
-	// Reemplazar cualquier coma (,) por punto (.) en el formato numérico
-	cpuPercentageStr = strings.Replace(cpuPercentageStr, ",", ".", -1)
-
-	// Convertir el string a float64
-	cpuPercentage, err := strconv.ParseFloat(cpuPercentageStr, 64)
-	if err != nil {
-		return 0, fmt.Errorf("Error al convertir datos de CPU a float: %v", err)
-	}
-
-	// Calcular el porcentaje de uso de la CPU
-	cpuUsage := 100.0 - cpuPercentage
-
-	return cpuUsage, nil
+	// Formatear a dos decimales
+    cpuUsageStr := fmt.Sprintf("%.2f", cpuUsage)
+    cpuUsage, err = strconv.ParseFloat(cpuUsageStr, 64)
+    if err != nil {
+        return 0, err
+    }
+	
+    return cpuUsage, nil
 }
+
 
 // Funcion para obtener los procesos del sistema
 func getProcesses() (ProcessData, error) {
@@ -139,7 +135,7 @@ func getProcesses() (ProcessData, error) {
 	if err != nil {
 		return ProcessData{}, err
 	}
-
+	
 	return data, nil
 }
 
@@ -170,7 +166,7 @@ func getProcesos(c *fiber.Ctx) error {
 
 	processData, err := getProcesses()
 	if err != nil {
-		return c.Status(500).SendString("Error al obtener los procesos del sistema")
+		return c.Status(500).SendString("Error al obtener los procesos del sistema aaa")
 	}
 
 	var procesos []map[string]interface{}
