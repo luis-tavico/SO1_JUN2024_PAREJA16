@@ -45,7 +45,7 @@ func main() {
 
 // Estructura para los datos del sistema
 type SystemData struct {
-	RAM_percentage int `json:"ram_percentage"`
+	RAM_percentage int     `json:"ram_percentage"`
 	CPU_percentage float64 `json:"cpu_percentage"`
 }
 
@@ -167,7 +167,7 @@ func getEstadisticas(c *fiber.Ctx) error {
 }
 
 func getProcesos(c *fiber.Ctx) error {
-	
+
 	processData, err := getProcesses()
 	if err != nil {
 		return c.Status(500).SendString("Error al obtener los procesos del sistema")
@@ -208,51 +208,48 @@ func getProcesos(c *fiber.Ctx) error {
 		"total":        total,
 	}
 
-	
+	// Obtener los procesos del sistema
+	processes, err := getProcesses()
+	if err != nil {
+		fmt.Println("Error al obtener los procesos del sistema: ", err)
+		return c.Status(500).SendString("Error al obtener los procesos del sistema")
 
-// Obtener los procesos del sistema
-processes, err := getProcesses()
-if err != nil {
-	fmt.Println("Error al obtener los procesos del sistema: ", err)
-	return c.Status(500).SendString("Error al obtener los procesos del sistema")
+	}
 
-}
+	response := map[string]interface{}{
+		"procesos": processes,
+		"info":     info,
+	}
 
-
-response := map[string]interface{}{
-	"procesos": processes,
-	"info":     info,
-}
-
-return c.JSON(response)
+	return c.JSON(response)
 
 }
 
 func crearProceso(c *fiber.Ctx) error {
-    // Crear el comando
-    cmd := exec.Command("sleep", "infinity")
+	// Crear el comando
+	cmd := exec.Command("sleep", "infinity")
 
-    // Iniciar el comando
-    err := cmd.Start()
-    if err != nil {
-        response := map[string]string{
-            "estado": "Error",
-            "pid":    "Error al crear el proceso",
-        }
-        return c.JSON(response)
-    }
+	// Iniciar el comando
+	err := cmd.Start()
+	if err != nil {
+		response := map[string]string{
+			"estado": "Error",
+			"pid":    "Error al crear el proceso",
+		}
+		return c.JSON(response)
+	}
 
-    // Obtener el PID del proceso y convertirlo a string
-    pid := strconv.Itoa(cmd.Process.Pid)
+	// Obtener el PID del proceso y convertirlo a string
+	pid := strconv.Itoa(cmd.Process.Pid)
 
-    // Crear la respuesta
-    response := map[string]string{
-        "estado": "creado",
-        "pid":    pid,
-    }
+	// Crear la respuesta
+	response := map[string]string{
+		"estado": "creado",
+		"pid":    pid,
+	}
 
-    // Retornar la respuesta JSON
-    return c.JSON(response)
+	// Retornar la respuesta JSON
+	return c.JSON(response)
 }
 
 func detenerProceso(c *fiber.Ctx) error {
@@ -267,13 +264,13 @@ func detenerProceso(c *fiber.Ctx) error {
 		return c.JSON(response)
 	}
 	// Crear la respuesta
-    response := map[string]string{
-        "estado": "Eliminado",
-        "pid":    "El proceso "+pid+ " fue detenido.",
-    }
+	response := map[string]string{
+		"estado": "Eliminado",
+		"pid":    "El proceso " + pid + " fue detenido.",
+	}
 
-    // Retornar la respuesta JSON
-    return c.JSON(response)
+	// Retornar la respuesta JSON
+	return c.JSON(response)
 }
 
 func insertDB() {
