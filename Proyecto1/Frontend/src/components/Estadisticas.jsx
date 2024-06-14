@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import 'chart.js/auto'; // Importación automática de los componentes de Chart.js
 import '../styles/Estilo.css'; // Asegúrate de crear este archivo para los estilos
@@ -7,6 +7,7 @@ function Estadisticas() {
   const [cpuData, setCpuData] = useState(null);
   const [ramData, setRamData] = useState(null);
   const url = "http://192.168.122.30:8080";
+
   useEffect(() => {
     const fetchData = () => {
       // Fetch data from the API
@@ -15,7 +16,7 @@ function Estadisticas() {
         .then(data => {
           setCpuData(parseFloat(data.cpu_percentage));
           setRamData(parseInt(data.ram_percentage));
-          //console.log('Datos recibidos:', data); // Imprimir en la consola
+          console.log('Datos recibidos:', data); // Imprimir en la consola
         })
         .catch(error => console.error('Error fetching data:', error));
     };
@@ -29,10 +30,10 @@ function Estadisticas() {
     return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
   }, []);
 
-  const doughnutData = (label, percentageUsed) => {
+  const doughnutData = useMemo(() => (label, percentageUsed) => {
     const percentageFree = 100 - percentageUsed;
     return {
-      labels: [`${label} Usado`, `${label} Libre`],
+      labels: [`${label} Usado `, `${label} Libre`],
       datasets: [
         {
           data: [percentageUsed, percentageFree],
@@ -40,7 +41,7 @@ function Estadisticas() {
         },
       ],
     };
-  };
+  }, []);
 
   return (
     <div className="estadisticas-container">

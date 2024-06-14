@@ -1,3 +1,5 @@
+# Dockerfile for the frontend
+
 FROM node:20-alpine as builder
 
 WORKDIR /frontend
@@ -9,9 +11,7 @@ RUN npm install
 
 COPY . ./
 
-# EXPOSE 5173
-
-# CMD ["npm", "run", "dev"]
+RUN npm run build
 
 FROM nginx:1.21-alpine as final
 
