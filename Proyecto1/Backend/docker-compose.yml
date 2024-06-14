@@ -1,4 +1,4 @@
-version: '3'
+version: '2.21.1'
 
 services:
   database:
@@ -13,7 +13,7 @@ services:
       - '27017:27017'
 
   backend:
-    image: jdveloper/so1_back_jun2024:latest
+    image: racs0/so1_back_jun2024:1.0.0
     privileged: true
     pid: host
     container_name: backend_container
@@ -23,7 +23,7 @@ services:
       #- DB_NAME:${DB_NAME}
     env_file: .env
     ports:
-      - '8000:8000'
+      - '8080:8080'
     volumes:
      - type: bind
        source: /proc
@@ -34,16 +34,16 @@ services:
     links:
       - database
 
-  frontend:
-    image: jdveloper/so1_front_jun2024:latest
-    container_name: front_container
-    ports:
-      - '80:80'
-    restart: always
-    depends_on:
-      - backend
-    links:
-      - backend
+  #frontend:
+  #  image: jdveloper/so1_front_jun2024:latest
+  #  container_name: front_container
+  #  ports:
+  #    - '80:80'
+  #  restart: always
+  #  depends_on:
+  #    - backend
+  #  links:
+  #    - backend
 
 volumes:
   mongo-data:

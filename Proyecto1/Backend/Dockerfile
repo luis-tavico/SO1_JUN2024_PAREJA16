@@ -6,6 +6,12 @@ COPY . ./
 
 RUN go get -d -v
 RUN go build -o /go/bin/app
+RUN go get github.com/gorilla/mux
+RUN go get github.com/gorilla/handlers
+RUN go get go.mongodb.org/mongo-driver/mongo
+RUN go get go.mongodb.org/mongo-driver/mongo/options
+RUN go get github.com/gofiber/fiber/v2
+RUN go get github.com/gofiber/fiber/v2/middleware/cors
 
 #ENV DB_HOST="localhost"
 #ENV DB_PORT="27017"
