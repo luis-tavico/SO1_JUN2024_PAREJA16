@@ -16,7 +16,7 @@ RUN go get github.com/gofiber/fiber/v2/middleware/cors
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates bash sysstat
+RUN apk --no-cache add ca-certificates bash sysstat procps
 
 WORKDIR /app
 COPY --from=builder /go/bin/app /app

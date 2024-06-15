@@ -1,4 +1,4 @@
-version: '2.21.1'
+version: '3'
 
 services:
   database:
@@ -16,6 +16,8 @@ services:
 
   backend:
     image: racs0/so1_back_jun2024_p16:1.0.0
+    privileged: true
+    pid: host
     container_name: backend_container
     env_file: .env
     ports:
