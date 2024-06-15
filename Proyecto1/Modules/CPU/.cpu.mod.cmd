@@ -1,0 +1,1 @@
+cmd_/home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.mod := { echo  /home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.o;  echo; } > /home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.mod

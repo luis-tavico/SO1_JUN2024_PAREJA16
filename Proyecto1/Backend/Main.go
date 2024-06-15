@@ -238,6 +238,16 @@ func crearProceso(c *fiber.Ctx) error {
 	// Obtener el PID del proceso y convertirlo a string
 	pid := strconv.Itoa(cmd.Process.Pid)
 
+	// Actualizar la tabla de procesos
+	err = updateProcessTable()
+	if err != nil {
+		response := map[string]string{
+			"estado": "Error",
+			"pid":    "Error al actualizar la tabla de procesos",
+		}
+		return c.JSON(response)
+	}
+
 	// Crear la respuesta
 	response := map[string]string{
 		"estado": "creado",
@@ -247,6 +257,7 @@ func crearProceso(c *fiber.Ctx) error {
 	// Retornar la respuesta JSON
 	return c.JSON(response)
 }
+
 
 func detenerProceso(c *fiber.Ctx) error {
 	pid := c.Params("pid")
@@ -259,6 +270,17 @@ func detenerProceso(c *fiber.Ctx) error {
 		}
 		return c.JSON(response)
 	}
+
+	// Actualizar la tabla de procesos
+	err = updateProcessTable()
+	if err != nil {
+		response := map[string]string{
+			"estado": "Error",
+			"pid":    "Error al actualizar la tabla de procesos",
+		}
+		return c.JSON(response)
+	}
+
 	// Crear la respuesta
 	response := map[string]string{
 		"estado": "Eliminado",
@@ -268,6 +290,41 @@ func detenerProceso(c *fiber.Ctx) error {
 	// Retornar la respuesta JSON
 	return c.JSON(response)
 }
+
+func updateProcessTable() error {
+	processes, err := getProcesses()
+	if err != nil {
+		return err
+	}
+
+	// Primero elimina los datos antiguos
+	Controller.DeleteDataProcess("process")
+
+	// Luego inserta los datos actualizados
+	for _, process := range processes.Processes {
+		dataProcess := Model.DataProcess{
+			Pid:   strconv.Itoa(process.Pid),
+			Name:  process.Name,
+			User:  strconv.Itoa(process.User),
+			State: strconv.Itoa(process.State),
+			Ram:   strconv.Itoa(process.Ram),
+		}
+		Controller.InsertDataProcess("process", dataProcess)
+
+		for _, child := range process.Child {
+			dataProcess := Model.DataProcess{
+				Pid:      strconv.Itoa(child.Pid),
+				Name:     child.Name,
+				State:    strconv.Itoa(child.State),
+				PidPadre: strconv.Itoa(process.Pid),
+			}
+			Controller.InsertDataProcess("process", dataProcess)
+		}
+	}
+
+	return nil
+}
+
 
 func insertDB() {
 	for range time.Tick(time.Second * 1) {

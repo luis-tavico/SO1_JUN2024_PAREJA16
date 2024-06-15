@@ -1,0 +1,1 @@
+cmd_/home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.ko /home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.o /home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules/CPU/cpu.mod.o;  true
