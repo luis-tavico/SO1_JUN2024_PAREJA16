@@ -12,16 +12,11 @@ Una vez que cada componente fue dockerizado y funcional de manera individual, se
 
 Para el desarrollo de la interfaz de usuario se utilizo React, la cual es una biblioteca de JavaScript para construir interfaces de usuario. 
 
-Se utilizaron varias dependecias para desarrollar el frontend, asi como librerias para graficar. Se utilizo router para tener varias paginas en un header y así poder navegar entre varios entornos. A continuación se enlistaran todas las librerias que se utilizaron en el proyecto:
+Se utilizaron varias dependecias para desarrollar el frontend, asi como librerias para graficar. Se utilizo router para tener varias paginas en un header y así poder navegar entre varios entornos. A continuación se enlistaran algunas de las librerias que se utilizaron en el proyecto:
 
-1. Bootstrap (^5.3.2)
-2. Chart.js (^4.4.1)
-3. React (^18.2.0)
-4. React Bootstrap (^2.10.1)
-5. React Icons (^5.0.1)
-6. React Router Dom (^6.22.0)
-7. React Toastify (^10.0.4)
-8. Vis-Data (^7.1.9) y Vis-Network (^9.1.9)
+1. Bootstrap (^5.3.0)
+2. chart.js (^4.4.3)
+3. React-table (^7.8.0)
 
 A continuacion se detallan componentes que conforman el frontend:
 
@@ -35,11 +30,11 @@ En este componente se muestra el porcentaje de memoria RAM utilizada y el porcen
 
 En este componente se muestra una tabla que lista todos los procesos del CPU. La tabla incluye las siguientes columnas: PID, name, user, state, RAM y un botón de acciones nombrado actions. Al hacer clic en el botón de acciones, se despliegan todos los procesos hijos, si existen.
 
-![procesos](./images/estadisticas.jpeg)
+![procesos](./images/tabla_procesos.jpeg)
 
 En este componente tambien se pueden buscar, crear y eliminar procesos.
 
-![procesos](./images/estadisticas.jpeg)
+![procesos](./images/procesos_acciones.jpeg)
 
 ## Nginx 
 
@@ -55,6 +50,8 @@ Algunas características clave de Nginx son:
 ## Base de Datos
 
 MongoDB se utiliza como el sistema de gestion de bases de datos para almacenar y administrar datos relacionados con el sistema. Se utiliza una imagen de Docker de MongoDB, que se obtiene de Docker Hub. Esto asegura la consistencia y facilidad de implementacion en diferentes entornos.
+
+![procesos](./images/basedatos.jpeg)
 
 ## Backend
 
