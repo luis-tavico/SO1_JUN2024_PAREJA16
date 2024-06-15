@@ -10,7 +10,7 @@ function Head() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link href="/estadisticas">Estadisticas</Nav.Link>
-            <Nav.Link href="/tablaprocesos">Tabla de Procesos</Nav.Link>
+            <Nav.Link href="/procesos">Tabla de Procesos</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

@@ -3,7 +3,7 @@ import { useTable, useExpanded } from 'react-table';
 import { Table, Button, InputGroup, FormControl } from 'react-bootstrap';
 import '../styles/EstiloProcesos.css';
 
-function TablaProcesos() {
+function Procesos() {
   const [processes, setProcesses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchPidTerm, setSearchPidTerm] = useState('');
@@ -320,4 +320,4 @@ function TablaProcesos() {
   );
 }
 
-export default TablaProcesos;
+export default Procesos;

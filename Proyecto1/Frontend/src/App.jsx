@@ -6,7 +6,7 @@ import ModoOscuro from "./components/ModoOscuro"
 import './styles/App.css'
 import Head from "./components/Head"
 import Estadisticas from './components/Estadisticas'
-import TablaProcesos from './components/TablaProcesos'
+import Procesos from './components/Procesos'
 
 
 function App() {
@@ -20,8 +20,8 @@ function App() {
       component = <Estadisticas />
       // Lógica para la ruta "/estadisticas"
       break;
-    case "/tablaprocesos":
-      component = <TablaProcesos />
+    case "/procesos":
+      component = <Procesos />
       break;
     // Otros casos aquí
     default:
