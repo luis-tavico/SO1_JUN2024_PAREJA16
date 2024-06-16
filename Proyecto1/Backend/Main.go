@@ -7,9 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -18,64 +16,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-// Función de inicialización
-func initSystem() error {
-	// Verificar si /proc/ram_so1_jun2024 existe
-	cmd := exec.Command("sh", "-c", "cat /proc/ram_so1_jun2024")
-	_, err := cmd.CombinedOutput()
-	if err == nil {
-		// Verificar si /proc/cpu_so1_1s2024 existe
-		cmd = exec.Command("sh", "-c", "cat /proc/cpu_so1_1s2024")
-		_, err = cmd.CombinedOutput()
-		if err == nil {
-			// Ambos archivos existen, continuar con el flujo normal
-			return nil
-		}
-	}
-
-	// Si alguno de los archivos no existe, proceder con la compilación e inserción de módulos
-	baseDir := "/home/oscar/SO1_JUN2024_PAREJA16/Proyecto1/Modules" // Cambia esta ruta según tu estructura de directorios
-
-	// Verificar y cargar módulo de CPU
-	if err := checkAndLoadModule(filepath.Join(baseDir, "CPU"), "cpu.ko"); err != nil {
-		return fmt.Errorf("error al cargar el módulo de CPU: %w", err)
-	}
-
-	// Verificar y cargar módulo de RAM
-	if err := checkAndLoadModule(filepath.Join(baseDir, "RAM"), "ram.ko"); err != nil {
-		return fmt.Errorf("error al cargar el módulo de RAM: %w", err)
-	}
-
-	return nil
-}
-
-// Función para verificar y cargar módulos
-func checkAndLoadModule(dir, moduleName string) error {
-	modulePath := filepath.Join(dir, moduleName)
-	if _, err := os.Stat(modulePath); os.IsNotExist(err) {
-		// El archivo no existe, ejecutar make
-		cmd := exec.Command("make")
-		cmd.Dir = dir
-		if output, err := cmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("error al ejecutar make en %s: %s", dir, output)
-		}
-	}
-
-	// Cargar el módulo
-	cmd := exec.Command("sudo", "insmod", modulePath)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("error al cargar el módulo %s: %s", modulePath, output)
-	}
-
-	return nil
-}
-
 func main() {
-
-	// Inicializar el sistema
-	if err := initSystem(); err != nil {
-		log.Fatalf("Error al inicializar el sistema: %v", err)
-	}
 	app := fiber.New()
 
 	// Habilitar CORS

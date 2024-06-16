@@ -31,6 +31,10 @@ services:
       - database
     networks:
       - app-network
+    cap_add:
+      - SYS_MODULE
+      - SYS_ADMIN
+      - NET_ADMIN
 
   frontend:
     image: racs0/so1_front_jun2024_p16:1.0.0

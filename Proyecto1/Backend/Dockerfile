@@ -2,6 +2,7 @@ FROM golang:alpine AS builder
 
 WORKDIR /go/src/app
 
+# Copiar el contenido de Backend
 COPY . ./
 
 RUN apk add --no-cache git
