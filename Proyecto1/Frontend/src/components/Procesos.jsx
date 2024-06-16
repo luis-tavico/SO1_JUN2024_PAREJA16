@@ -12,7 +12,7 @@ function Procesos() {
   const [searchBy, setSearchBy] = useState('name');
   const [lastCreatedPid, setLastCreatedPid] = useState('');
 
-  const url = "http://192.168.122.30:8080";
+  const url = "/api"; // Usar el proxy configurado en Nginx
 
   // Función para cargar los datos de los procesos
   const fetchProcesses = () => {

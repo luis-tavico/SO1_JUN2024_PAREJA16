@@ -6,12 +6,12 @@ import '../styles/Estilo.css'; // Asegúrate de crear este archivo para los esti
 function Estadisticas() {
   const [cpuData, setCpuData] = useState(null);
   const [ramData, setRamData] = useState(null);
-  const url = "http://192.168.122.30:8080";
+  const url = "/api"; // Usar el proxy configurado en Nginx
 
   useEffect(() => {
     const fetchData = () => {
       // Fetch data from the API
-      fetch(url+'/estadisticas') // Reemplaza con tu endpoint real
+      fetch(url + '/estadisticas') // Reemplaza con tu endpoint real
         .then(response => response.json())
         .then(data => {
           setCpuData(parseFloat(data.cpu_percentage));
