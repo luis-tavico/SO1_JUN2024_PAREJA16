@@ -3,4 +3,4 @@
 ## Pareja 16
 Pedro Luis Pu Tavico - 202000562
 <br>
-Oscar Eduardo Morales Girón - 2016201603028
+Oscar Eduardo Morales Girón - 201603028
