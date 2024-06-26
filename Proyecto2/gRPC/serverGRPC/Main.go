@@ -24,20 +24,19 @@ type Data struct {
 var ctx = context.Background()
 
 func (s *server) ReturnInfo(ctx context.Context, in *pb.RequestId) (*pb.ReplyInfo, error) {
-	tweet := Data{
-		Texto: in.GetTexto(),
-		Pais:  in.GetPais(),
-	}
-
-	// Incrementar contador en Redis
-	err := s.rdb.HIncrBy(ctx, "countries", tweet.Pais, 1).Err()
+	// Procesar la solicitud recibida
+	err := s.rdb.HIncrBy(ctx, "countries", in.GetPais(), 1).Err()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(tweet)
+	fmt.Printf("Texto: %s, País: %s\n", in.GetTexto(), in.GetPais())
 
-	return &pb.ReplyInfo{Info: "Hola cliente, recibí el album"}, nil
+	// Devolver la respuesta con los datos procesados
+	return &pb.ReplyInfo{
+		Texto: in.GetTexto(),
+		Pais:  in.GetPais(),
+	}, nil
 }
 
 func main() {
