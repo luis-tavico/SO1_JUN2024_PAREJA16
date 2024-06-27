@@ -7,16 +7,19 @@ import (
 	"net"
 	"sync"
 
+	"serverGRPC/kafka"
+	"serverGRPC/model"
+	pb "serverGRPC/server"
+
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
-	pb "serverGRPC/server"
 )
 
 type server struct {
 	pb.UnimplementedGetInfoServer
-	rdb          *redis.Client
+	rdb           *redis.Client
 	totalMessages int64 // Contador global para el total de mensajes
-	mu           sync.Mutex
+	mu            sync.Mutex
 }
 
 type Data struct {
@@ -27,6 +30,11 @@ type Data struct {
 var ctx = context.Background()
 
 func (s *server) ReturnInfo(ctx context.Context, in *pb.RequestId) (*pb.ReplyInfo, error) {
+	tweet := model.Data{
+		Texto: in.GetTexto(),
+		Pais:  in.GetPais(),
+	}
+
 	// Procesar la solicitud recibida
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -44,6 +52,8 @@ func (s *server) ReturnInfo(ctx context.Context, in *pb.RequestId) (*pb.ReplyInf
 	}
 
 	fmt.Printf("Texto: %s, País: %s\n", in.GetTexto(), in.GetPais())
+
+	kafka.Produce(tweet)
 
 	// Devolver la respuesta con los datos procesados
 	return &pb.ReplyInfo{
