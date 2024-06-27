@@ -47,6 +47,7 @@ func sendData(c *fiber.Ctx) error {
 		Texto: tweet.Texto,
 		Pais:  tweet.Pais,
 	})
+	
 	if err != nil {
 		return err
 	}
