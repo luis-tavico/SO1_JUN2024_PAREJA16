@@ -35,7 +35,7 @@ func processEvent(event []byte) {
 func main() {
 	topic := "mytopic"
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:     []string{"localhost:9092"},
+		Brokers:     []string{"my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"},
 		Topic:       topic,
 		Partition:   0,
 		MinBytes:    10e3,

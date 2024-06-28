@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: consumer
-  namespace: so1jun2024
+  namespace: project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: consumer
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: consumer
-        image: luistavico/consumer-kafka
+        image: racs0/consumer-kafka
         resources:
           limits:
             cpu: "0.4"

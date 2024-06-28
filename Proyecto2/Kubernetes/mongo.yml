@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongo-db
-  namespace: so1jun2024
+  namespace: project
   labels:
     app: mongo-db
 spec:
@@ -32,7 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongo-service
-  namespace: so1jun2024
+  namespace: project
 spec:
   type: LoadBalancer
   ports:

@@ -14,6 +14,5 @@ message requestId {
 }
 
 message replyInfo {
-  string texto = 1;
-  string pais = 2;
+  string info = 1;
 }

@@ -13,7 +13,7 @@ func Produce(value model.Data) {
 	topic := "mytopic"
 	partition := 0
 
-	conn, err := kafka.DialLeader(context.Background(), "tcp", "localhost:9092", topic, partition)
+	conn, err := kafka.DialLeader(context.Background(), "tcp", "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092", topic, partition)
 	if err != nil {
 		panic(err)
 	}

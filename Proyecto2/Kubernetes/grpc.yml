@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grpc-producer
-  namespace: so1jun2024
+  namespace: project
 spec:
   replicas: 1
   selector:
@@ -30,12 +30,20 @@ spec:
           limits:
             cpu: "0.4"
             memory: "500Mi"
+      - name: rust-redis
+        image: racs0/redis-rust
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            cpu: "0.3"
+            memory: "300Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: grpc-client-service
-  namespace: so1jun2024
+  namespace: project
 spec:
   selector:
     app: grpc-producer
@@ -44,3 +52,31 @@ spec:
       port: 3000
       targetPort: 3000
   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server-service
+  namespace: project
+spec:
+  selector:
+    app: grpc-producer
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rust-redis-service
+  namespace: project
+spec:
+  selector:
+    app: grpc-producer
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer
