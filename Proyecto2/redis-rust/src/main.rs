@@ -19,6 +19,10 @@ async fn set_data(data: Json<Data>) -> Result<&'static str, &'static str> {
     // Conexion a redis
     let mut con = client.get_connection()
         .map_err(|_| "Failed to connect to Redis")?;
+    
+    // Insertar hash en redis
+    let _: () = con.hincr(&data.Pais, &data.Texto, 1)
+    .map_err(|_| "Failed to set data in Redis")?;
 
     // Insertar hash en redis
     let _: () = con.hincr("countries", &data.Pais, 1)
